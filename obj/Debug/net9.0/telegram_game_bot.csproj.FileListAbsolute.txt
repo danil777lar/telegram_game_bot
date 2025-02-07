@@ -15,3 +15,4 @@
 /home/danilka/RiderProjects/telegram_game_bot/obj/Debug/net9.0/telegram_game_bot.pdb
 /home/danilka/RiderProjects/telegram_game_bot/obj/Debug/net9.0/telegram_game_bot.genruntimeconfig.cache
 /home/danilka/RiderProjects/telegram_game_bot/obj/Debug/net9.0/ref/telegram_game_bot.dll
+/home/danilka/RiderProjects/telegram_game_bot/obj/Debug/net9.0/telegram_game_bot.sourcelink.json

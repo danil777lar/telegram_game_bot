@@ -17,6 +17,20 @@ namespace TelegramBot
 
         static async Task Main(string[] args)
         {
+            foreach (string arg in args)
+            {
+                if (arg.StartsWith("--token="))
+                {
+                    s_token = arg.Substring("--token=".Length);
+                }
+            }
+
+            if (string.IsNullOrEmpty(s_token))
+            {
+                Console.WriteLine("Please provide a bot token as --token=...");
+                return;
+            }
+
             s_cts = new CancellationTokenSource();
             s_bot = new TelegramBotClient(s_token, cancellationToken: s_cts.Token);
 
@@ -29,7 +43,10 @@ namespace TelegramBot
             s_bot.OnUpdate += OnUpdate;
 
             Console.WriteLine($"@{s_me.Username} is running... Press Escape to terminate");
-            while (Console.ReadKey(true).Key != ConsoleKey.Escape) ;
+            while (Console.ReadKey(true).Key != ConsoleKey.Escape)
+            {
+            }
+
             s_cts.Cancel();
         }
 
