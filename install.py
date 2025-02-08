@@ -3,18 +3,21 @@ import sys
 
 NAME = ""
 TOKEN = ""
+GAME = ""
 
 EXECUTABLE_PATH = ""
 SERVICE_PATH = ""
 USER = "root"
 
 def load_args():
-    global NAME, TOKEN, EXECUTABLE_PATH, SERVICE_PATH
+    global NAME, TOKEN, GAME, EXECUTABLE_PATH, SERVICE_PATH
     for i, arg in enumerate(sys.argv):
         if arg == "--name":
             NAME = f"tgbot_{sys.argv[i + 1]}"
         if arg == "--token":
             TOKEN = sys.argv[i + 1]
+        if arg == "--game":
+            GAME = sys.argv[i + 1]
 
     EXECUTABLE_PATH = f"/usr/local/bin/{NAME}"
     SERVICE_PATH = f"/etc/systemd/system/{NAME}.service"
@@ -23,8 +26,10 @@ def check_args():
     if NAME == "":
         print("You need to specify the service name by using --name")
     if TOKEN == "":
-        print(TOKEN)
         print("You need to specify the service token by using --token")
+        sys.exit(1)
+    if GAME == "":
+        print("You need to specify the service game by using --game")
         sys.exit(1)
 
 def copy_bin_files():
@@ -42,7 +47,7 @@ def generate_service_content():
     After=network.target
 
     [Service]
-    ExecStart={EXECUTABLE_PATH}/telegram_game_bot --token={TOKEN}
+    ExecStart={EXECUTABLE_PATH}/telegram_game_bot --token={TOKEN} --game={GAME}
     WorkingDirectory={EXECUTABLE_PATH}
     Restart=always
     User={USER}
