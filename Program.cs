@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net.NetworkInformation;
 using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
@@ -30,6 +31,11 @@ namespace TelegramBot
                 Console.WriteLine("Please provide a bot token as --token=...");
                 return;
             }
+            
+            while (!NetworkInterface.GetIsNetworkAvailable())
+            {
+                Thread.Sleep(100);
+            }
 
             s_cts = new CancellationTokenSource();
             s_bot = new TelegramBotClient(s_token, cancellationToken: s_cts.Token);
@@ -41,13 +47,8 @@ namespace TelegramBot
             s_bot.OnError += OnError;
             s_bot.OnMessage += OnMessage;
             s_bot.OnUpdate += OnUpdate;
-
-            Console.WriteLine($"@{s_me.Username} is running... Press Escape to terminate");
-            while (Console.ReadKey(true).Key != ConsoleKey.Escape)
-            {
-            }
-
-            s_cts.Cancel();
+            
+            Thread.Sleep(-1);
         }
 
         static async Task OnError(Exception exception, HandleErrorSource source)

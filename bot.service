@@ -1,0 +1,13 @@
+[Unit]
+Description=Telegram bot
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/dotnet /home/**usr**/MyApp/MyApp.dll --token=**token**
+WorkingDirectory=/home/**usr**/MyApp
+Restart=always
+User=**usr**
+Group=user
+
+[Install]
+WantedBy=multi-user.target
