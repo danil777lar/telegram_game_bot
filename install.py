@@ -8,21 +8,6 @@ EXECUTABLE_PATH = ""
 SERVICE_PATH = ""
 USER = "root"
 
-SERVICE_CONTENT = f"""[Unit]
-Description={NAME} telegram bot
-After=network.target
-
-[Service]
-ExecStart={EXECUTABLE_PATH}/MyApp --token={TOKEN}
-WorkingDirectory={EXECUTABLE_PATH}
-Restart=always
-User=**usr**
-Group=user
-
-[Install]
-WantedBy=multi-user.target
-"""
-
 def load_args():
     global NAME, TOKEN, EXECUTABLE_PATH, SERVICE_PATH
     for i, arg in enumerate(sys.argv):
@@ -51,18 +36,33 @@ def copy_bin_files():
 
 
 def generate_service_content():
+    service_content = f"""
+    [Unit]
+    Description={NAME} telegram bot
+    After=network.target
+
+    [Service]
+    ExecStart={EXECUTABLE_PATH}/telegram_game_bot --token={TOKEN}
+    WorkingDirectory={EXECUTABLE_PATH}
+    Restart=always
+    User={USER}
+    Group={USER}
+
+    [Install]
+    WantedBy=multi-user.target
+    """
+
     with open(SERVICE_PATH, "w") as file:
-        file.write(SERVICE_CONTENT)
+        file.write(service_content)
 
     os.chmod(SERVICE_PATH, 0o644)
     print(f"Сервисный файл создан: {SERVICE_PATH}")
-    print("Не забудьте выполнить:")
-    print(f"  sudo systemctl daemon-reload")
-    print(f"  sudo systemctl enable {NAME}.service")
-    print(f"  sudo systemctl start {NAME}.service")
+    os.system(f"sudo systemctl daemon-reload")
+    os.system(f"sudo systemctl enable {NAME}.service")
+    os.system(f"sudo systemctl start {NAME}.service")
 
 if __name__ == "__main__":
     load_args()
     check_args()
     copy_bin_files()
-    #generate_service_content()
+    generate_service_content()
