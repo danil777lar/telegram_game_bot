@@ -112,7 +112,7 @@ namespace TelegramBot
         {
             InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(new[]
             {
-                InlineKeyboardButton.WithUrl("Play!", s_game)
+                InlineKeyboardButton.WithWebApp("Play!", s_game)
             });
 
             await s_bot.SendTextMessageAsync(

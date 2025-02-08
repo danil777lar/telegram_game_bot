@@ -67,6 +67,7 @@ def generate_service_content():
 
     os.chmod(SERVICE_PATH, 0o644)
     print(f"Сервисный файл создан: {SERVICE_PATH}")
+    os.system(f"sudo systemctl stop {NAME}.service")
     os.system(f"sudo systemctl daemon-reload")
     os.system(f"sudo systemctl enable {NAME}.service")
     os.system(f"sudo systemctl start {NAME}.service")
