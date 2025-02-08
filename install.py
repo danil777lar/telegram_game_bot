@@ -52,7 +52,7 @@ def generate_service_content():
     After=network.target
 
     [Service]
-    ExecStart=usr/bin/dotnet {EXECUTABLE_PATH}/telegram_game_bot.dll --token={TOKEN} --game={GAME}
+    ExecStart=/usr/bin/dotnet {EXECUTABLE_PATH}/telegram_game_bot.dll --token={TOKEN} --game={GAME}
     WorkingDirectory={EXECUTABLE_PATH}
     Restart=always
     User={USER}
