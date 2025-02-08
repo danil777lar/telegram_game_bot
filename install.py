@@ -23,13 +23,18 @@ def load_args():
     SERVICE_PATH = f"/etc/systemd/system/{NAME}.service"
 
 def check_args():
+    need_exit = False
     if NAME == "":
         print("You need to specify the service name by using --name")
+        need_exit = True
     if TOKEN == "":
         print("You need to specify the service token by using --token")
-        sys.exit(1)
+        need_exit = True
     if GAME == "":
         print("You need to specify the service game by using --game")
+        need_exit = True
+
+    if need_exit:
         sys.exit(1)
 
 def copy_bin_files():

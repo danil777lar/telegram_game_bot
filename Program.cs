@@ -108,11 +108,26 @@ namespace TelegramBot
             await OnCommand("/start", "", msg);
         }
 
+        private static async Task SendGameMessage(Message msg)
+        {
+            InlineKeyboardMarkup inlineKeyboard = new InlineKeyboardMarkup(new[]
+            {
+                InlineKeyboardButton.WithUrl("Play!", s_game)
+            });
+
+            await s_bot.SendTextMessageAsync(
+                chatId: msg.Chat.Id,
+                text: "Hi! Press the button below to play the game.",
+                replyMarkup: inlineKeyboard
+            );
+        }
+        
+
         private static async Task OnCommand(string command, string args, Message msg)
         {
             if (command == "/start")
             {
-                await s_bot.SendMessage(msg.Chat, s_game);
+                await SendGameMessage(msg);
             }
         }
     }
