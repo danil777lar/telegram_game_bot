@@ -90,19 +90,10 @@ namespace TelegramBot
 
         private static async Task OnPreCheckoutQuery(PreCheckoutQuery query, CancellationToken cancellationToken)
         {
-            await s_bot.SendMessage(
-                chatId: query.From.Id,
-                text: "Get pre checkout query");
-                
             bool ok = true;
             try
             {
                 string? errorMessage = ok ? null : "Error in payment data";
-                    
-                await s_bot.SendMessage(
-                    chatId: query.From.Id,
-                    text: "Answer pre checkout query");
-                    
                 await s_bot.AnswerPreCheckoutQuery(query.Id, errorMessage, cancellationToken);
             }
             catch (Exception ex) { }
