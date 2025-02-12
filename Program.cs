@@ -121,7 +121,7 @@ namespace TelegramBot
                 InlineKeyboardButton.WithWebApp("Play!", s_game)
             });
 
-            await s_bot.SendTextMessageAsync(
+            await s_bot.SendMessage(
                 chatId: msg.Chat.Id,
                 text: "Hi! Press the button below to play the game.",
                 replyMarkup: inlineKeyboard
@@ -132,18 +132,23 @@ namespace TelegramBot
         {
             if (update.Type == UpdateType.PreCheckoutQuery)
             {
+                await s_bot.SendMessage(
+                    chatId:update.PreCheckoutQuery.From.Id,
+                    text: "Get pre checkout query");
+                
                 PreCheckoutQuery? preCheckoutQuery = update.PreCheckoutQuery;
                 bool ok = true;
                 try
                 {
                     string? errorMessage = ok ? null : "Error in payment data";
+                    
+                    await s_bot.SendMessage(
+                        chatId:update.PreCheckoutQuery.From.Id,
+                        text: "Answer pre checkout query");
+                    
                     await bot.AnswerPreCheckoutQuery(preCheckoutQuery.Id, errorMessage, cancellationToken);
-                    Console.WriteLine("pre_checkout_query success.");
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error pre_checkout_query: {ex.Message}");
-                }
+                catch (Exception ex) { }
             }
         }
         
