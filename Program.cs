@@ -4,6 +4,7 @@ using Telegram.Bot;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.Payments;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace TelegramBot
@@ -42,6 +43,11 @@ namespace TelegramBot
             s_bot.OnError += OnError;
             s_bot.OnMessage += OnMessage;
             
+            ReceiverOptions? receiverOptions = new ReceiverOptions
+            {
+                AllowedUpdates = new[] {UpdateType.Message, UpdateType.PreCheckoutQuery}
+            };
+            s_bot.StartReceiving(HandleUpdateAsync, HandleErrorAsync, receiverOptions, s_cts.Token);
             
             Thread.Sleep(-1);
         }
@@ -122,6 +128,29 @@ namespace TelegramBot
             );
         }
         
+        static async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, CancellationToken cancellationToken)
+        {
+            if (update.Type == UpdateType.PreCheckoutQuery)
+            {
+                PreCheckoutQuery? preCheckoutQuery = update.PreCheckoutQuery;
+                bool ok = true;
+                try
+                {
+                    string? errorMessage = ok ? null : "Error in payment data";
+                    await bot.AnswerPreCheckoutQuery(preCheckoutQuery.Id, errorMessage, cancellationToken);
+                    Console.WriteLine("pre_checkout_query success.");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error pre_checkout_query: {ex.Message}");
+                }
+            }
+        }
+        
+        static Task HandleErrorAsync(ITelegramBotClient bot, Exception exception, CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
+        }
 
         private static async Task OnCommand(string command, string args, Message msg)
         {
