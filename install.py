@@ -57,6 +57,8 @@ def generate_service_content():
     Restart=always
     User={USER}
     Group={USER}
+    StandardOutput=journal
+    StandardError=journal
 
     [Install]
     WantedBy=multi-user.target
