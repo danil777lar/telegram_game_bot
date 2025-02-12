@@ -13,6 +13,12 @@ namespace TelegramBot
     {
         private static string s_token = "";
         private static string s_game = "";
+        
+        private static UpdateType[] s_allowedUpdates =
+        {
+            UpdateType.Message, 
+            UpdateType.PreCheckoutQuery
+        };
 
         private static CancellationTokenSource s_cts;
         private static TelegramBotClient s_bot;
@@ -39,14 +45,8 @@ namespace TelegramBot
             s_me = await s_bot.GetMe();
             await s_bot.DeleteWebhook();
             await s_bot.DropPendingUpdates();
-
-            s_bot.OnError += OnError;
-            s_bot.OnMessage += OnMessage;
             
-            ReceiverOptions? receiverOptions = new ReceiverOptions
-            {
-                AllowedUpdates = new[] {UpdateType.Message, UpdateType.PreCheckoutQuery}
-            };
+            ReceiverOptions? receiverOptions = new ReceiverOptions { AllowedUpdates = s_allowedUpdates };
             s_bot.StartReceiving(HandleUpdateAsync, HandleErrorAsync, receiverOptions, s_cts.Token);
             
             Thread.Sleep(-1);
@@ -66,13 +66,48 @@ namespace TelegramBot
                 }
             }
         }
-
-        static async Task OnError(Exception exception, HandleErrorSource source)
+        
+        private static async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, CancellationToken cancellationToken)
+        {
+            Console.WriteLine($"Handling update {update.Type.ToString()}");
+            
+            switch (update.Type)
+            {
+                case UpdateType.Message:
+                    await OnMessage(update.Message, update.Type);
+                    break;
+                case UpdateType.PreCheckoutQuery:
+                    await OnPreCheckoutQuery(update.PreCheckoutQuery, cancellationToken);
+                    break;
+            }
+        }
+        
+        private static async Task HandleErrorAsync(ITelegramBotClient bot, Exception exception, CancellationToken cancellationToken)
         {
             Console.WriteLine(exception);
             await Task.Delay(2000, s_cts.Token);
         }
 
+        private static async Task OnPreCheckoutQuery(PreCheckoutQuery query, CancellationToken cancellationToken)
+        {
+            await s_bot.SendMessage(
+                chatId: query.From.Id,
+                text: "Get pre checkout query");
+                
+            bool ok = true;
+            try
+            {
+                string? errorMessage = ok ? null : "Error in payment data";
+                    
+                await s_bot.SendMessage(
+                    chatId: query.From.Id,
+                    text: "Answer pre checkout query");
+                    
+                await s_bot.AnswerPreCheckoutQuery(query.Id, errorMessage, cancellationToken);
+            }
+            catch (Exception ex) { }
+        }
+        
         private static async Task OnMessage(Message msg, UpdateType type)
         {
             if (msg.Text is not { } text)
@@ -100,7 +135,7 @@ namespace TelegramBot
                     }
                 }
 
-                await OnCommand(command, text[space..].TrimStart(), msg);
+                await OnCommandMessage(command, text[space..].TrimStart(), msg);
             }
             else
             {
@@ -111,7 +146,15 @@ namespace TelegramBot
         private static async Task OnTextMessage(Message msg)
         {
             Console.WriteLine($"Received text '{msg.Text}' in {msg.Chat}");
-            await OnCommand("/start", "", msg);
+            await OnCommandMessage("/start", "", msg);
+        }
+        
+        private static async Task OnCommandMessage(string command, string args, Message msg)
+        {
+            if (command == "/start")
+            {
+                await SendGameMessage(msg);
+            }
         }
 
         private static async Task SendGameMessage(Message msg)
@@ -126,43 +169,6 @@ namespace TelegramBot
                 text: "Hi! Press the button below to play the game.",
                 replyMarkup: inlineKeyboard
             );
-        }
-        
-        static async Task HandleUpdateAsync(ITelegramBotClient bot, Update update, CancellationToken cancellationToken)
-        {
-            if (update.Type == UpdateType.PreCheckoutQuery)
-            {
-                await s_bot.SendMessage(
-                    chatId:update.PreCheckoutQuery.From.Id,
-                    text: "Get pre checkout query");
-                
-                PreCheckoutQuery? preCheckoutQuery = update.PreCheckoutQuery;
-                bool ok = true;
-                try
-                {
-                    string? errorMessage = ok ? null : "Error in payment data";
-                    
-                    await s_bot.SendMessage(
-                        chatId:update.PreCheckoutQuery.From.Id,
-                        text: "Answer pre checkout query");
-                    
-                    await bot.AnswerPreCheckoutQuery(preCheckoutQuery.Id, errorMessage, cancellationToken);
-                }
-                catch (Exception ex) { }
-            }
-        }
-        
-        static Task HandleErrorAsync(ITelegramBotClient bot, Exception exception, CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
-
-        private static async Task OnCommand(string command, string args, Message msg)
-        {
-            if (command == "/start")
-            {
-                await SendGameMessage(msg);
-            }
         }
     }
 }
